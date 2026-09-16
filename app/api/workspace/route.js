@@ -1,4 +1,4 @@
-import { getSandbox, ROOT, safePath, safeCwd } from "../../../lib/sandbox";
+import { getSandbox, ROOT, workspacePath, safePath, safeCwd } from "../../../lib/sandbox";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
@@ -6,7 +6,7 @@ export const maxDuration = 45;
 function abs(cwd,p) {
   const c=safeCwd(cwd);
   const x=safePath(p);
-  return c ? c+"/"+x : x;
+  return c ? ROOT+"/"+c+"/"+x : ROOT+"/"+x;
 }
 
 async function run(sbx,args,cwd=ROOT) {
@@ -23,9 +23,9 @@ export async function GET(req) {
     const path=u.searchParams.get("path");
 
     if(u.searchParams.get("dirs")==="1") {
-      const base=cwd||".";
+      const base=workspacePath(cwd);
       const r=await run(sbx,"find "+JSON.stringify(base)+" -mindepth 1 -maxdepth 1 -type d -not -path '*/node_modules' -not -path '*/.git' | sort");
-      const prefix=cwd?cwd+"/":"./";
+      const prefix=cwd?cwd+"/":"";
       const dirs=(r.stdout||"").split("\n").filter(Boolean).map(x=>x.replace(/^\.\//,"").replace(prefix,""));
       return Response.json({cwd,dirs});
     }
@@ -36,10 +36,10 @@ export async function GET(req) {
       return Response.json({content:r.stdout||"",path});
     }
 
-    const base=cwd||".";
+    const base=workspacePath(cwd);
     const r=await run(sbx,"find "+JSON.stringify(base)+" -maxdepth 3 -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | sort");
     const prefix=cwd?cwd+"/":"./";
-    const files=(r.stdout||"").split("\n").filter(Boolean).map(p=>({path:p.replace(/^\.\//,"").replace(prefix,""),type:"file"}));
+    const files=(r.stdout||"").split("\n").filter(Boolean).map(p=>({path:p.replace(/^\.\//,"").replace(ROOT+"//","").replace(ROOT+"/","").replace(prefix,""),type:"file"}));
     return Response.json({cwd,files});
   } catch(e) {
     return Response.json({error:e.message||"Workspace unavailable"},{status:500});
