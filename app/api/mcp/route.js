@@ -1,4 +1,4 @@
-import { getSandbox, ROOT } from "../../../../lib/sandbox";
+import { getSandbox, ROOT } from "../../../lib/sandbox";
 export const dynamic="force-dynamic";
 const STORE=ROOT+"/.mce/mcp.json";
 async function run(s,c){return s.runCommand({cmd:"bash",args:["-lc",c],cwd:ROOT})}
