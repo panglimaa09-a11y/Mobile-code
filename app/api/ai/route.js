@@ -1,4 +1,4 @@
-import { getSandbox, ROOT, safeCwd } from "../../../../lib/sandbox";
+import { getSandbox, ROOT, safeCwd } from "../../../lib/sandbox";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
